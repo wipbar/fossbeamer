@@ -1,0 +1,8 @@
+[package]
+name = "bornscreen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tao = "0.28.1"
+wry = "0.41.0"
