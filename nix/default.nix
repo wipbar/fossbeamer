@@ -24,9 +24,13 @@ rec {
     name = "dev-env";
     paths = [
       profileEnv
+    ] ++ (with pkgs;[
+      niv
+      treefmt
 
-      pkgs.niv
-    ];
+      # Nix
+      nixpkgs-fmt
+    ]);
   };
 }
 
