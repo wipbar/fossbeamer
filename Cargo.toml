@@ -9,3 +9,12 @@ serde = { version = "1.0.204", features = ["derive"] }
 serde_json = "1.0.120"
 tao = "0.28.1"
 wry = "0.41.0"
+
+# FUTUREWORK: Somehow rustc wants to link this against zlib.
+# Properly declare a system dependency to zlib and have pkg-config discover it.
+# This fixes incremental `cargo build` invocations.
+[build-dependencies]
+system-deps = "2.0"
+
+[package.metadata.system-deps]
+zlib = "*"
