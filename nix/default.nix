@@ -30,6 +30,12 @@ rec {
 
       # Nix
       nixpkgs-fmt
+
+      # Rust
+      cargo
+      clippy
+      rust-analyzer
+      rustc
     ]);
   };
 }
