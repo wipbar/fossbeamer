@@ -1,5 +1,6 @@
 use std::{sync::mpsc::Receiver, thread};
 
+use serde::Deserialize;
 use tao::{
     event::{Event, StartCause, WindowEvent},
     event_loop::{ControlFlow, EventLoopBuilder},
@@ -7,9 +8,10 @@ use tao::{
 };
 use wry::WebViewBuilder;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
+#[serde(tag = "kind")]
 pub enum Command {
-    LoadUrl(String),
+    LoadUrl { url: String },
     Reload,
     Stop,
 }
@@ -49,7 +51,7 @@ pub fn spawn_browser(url: String, command_receiver: Option<Receiver<Command>>) -
                 }
             }
             // TODO: Remove the use of unwrap
-            Event::UserEvent(Command::LoadUrl(url)) => webview.load_url(url.as_str()).unwrap(),
+            Event::UserEvent(Command::LoadUrl { url }) => webview.load_url(url.as_str()).unwrap(),
             _ => (),
         }
     })
