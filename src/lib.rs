@@ -19,7 +19,7 @@ pub enum Command {
 pub fn spawn_browser(url: String, command_receiver: Option<Receiver<Command>>) -> wry::Result<()> {
     let event_loop = EventLoopBuilder::<Command>::with_user_event().build();
     let window = WindowBuilder::new()
-        .with_title("BornScreen")
+        .with_title("Fossbeamer")
         .build(&event_loop)
         .unwrap();
     let webview = WebViewBuilder::new(&window).with_url(url).build()?;

@@ -18,7 +18,7 @@ fn main() -> wry::Result<()> {
         listener.start().unwrap();
         fossbeamer::spawn_browser(url, Some(receiver))
     } else {
-        println!("BornScreen requires a URL as a parameter.");
+        println!("Fossbeamer requires a URL as a parameter.");
         Ok(())
     }
 }
