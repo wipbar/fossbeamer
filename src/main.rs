@@ -1,17 +1,23 @@
 use std::{env, sync::mpsc::channel};
 
+use config::Config;
+
 mod mqtt;
+mod config;
 
 fn main() -> wry::Result<()> {
     if let Some(url) = env::args().nth(1) {
-        println!("Opening {}", url);
+        println!("Loading the config...");
+        let config = Config::load().unwrap();
+
+        println!("Opening {}...", url);
 
         let (sender, receiver) = channel();
 
         let listener = mqtt::Listener {
-            id: "screen".to_string(),
-            host: "localhost".to_string(),
-            port: 1883,
+            id: config.id.unwrap_or("screen".to_string()),
+            host: config.host,
+            port: config.port,
             sender,
         };
 
