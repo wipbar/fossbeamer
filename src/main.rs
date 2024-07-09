@@ -22,7 +22,7 @@ fn main() -> wry::Result<()> {
         let (sender, receiver) = channel();
 
         let listener = mqtt::Listener {
-            id: config.id.unwrap_or("screen".to_string()),
+            id: config.id.unwrap_or(serial),
             host: config.host,
             port: config.port,
             sender,

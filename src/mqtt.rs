@@ -13,9 +13,10 @@ pub(crate) struct Listener {
 impl Listener {
     pub(crate) fn start(self) -> Result<(), ClientError> {
         let (client, mut connection) =
-            Client::new(MqttOptions::new(self.id, self.host, self.port), 64);
+            Client::new(MqttOptions::new(&self.id, self.host, self.port), 64);
 
-        client.subscribe("commands", rumqttc::QoS::AtLeastOnce)?;
+        client.subscribe("screens", rumqttc::QoS::AtLeastOnce)?;
+        client.subscribe(format!("screens/{}", self.id), rumqttc::QoS::AtLeastOnce)?;
 
         thread::spawn(move || {
             for event in connection.iter() {
