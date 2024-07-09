@@ -2,11 +2,18 @@ use std::{env, sync::mpsc::channel};
 
 use config::Config;
 
+mod common;
 mod mqtt;
 mod config;
+mod system;
 
 fn main() -> wry::Result<()> {
     if let Some(url) = env::args().nth(1) {
+        print!("Acquiring the CPU serial number...\r");
+        let serial = system::get_cpu_serial().unwrap();
+
+        println!("The CPU serial number is {}", serial);
+
         println!("Loading the config...");
         let config = Config::load().unwrap();
 

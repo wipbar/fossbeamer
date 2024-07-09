@@ -2,17 +2,13 @@ use std::{fs::File, io::BufReader};
 
 use serde::Deserialize;
 
+use crate::common::Error;
+
 #[derive(Deserialize)]
 pub(crate) struct Config {
     pub id: Option<String>,
     pub host: String,
     pub port: u16,
-}
-
-#[derive(Debug)]
-pub(crate) enum Error {
-    FileIoError,
-    ParsingError,
 }
 
 impl Config {
