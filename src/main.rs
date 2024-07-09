@@ -3,8 +3,8 @@ use std::{env, sync::mpsc::channel};
 use config::Config;
 
 mod common;
-mod mqtt;
 mod config;
+mod mqtt;
 mod system;
 
 fn main() -> wry::Result<()> {
