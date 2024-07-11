@@ -66,7 +66,7 @@
     enable = true;
     environment.GDK_BACKEND = "x11";
     user = "kiosk";
-    program = "${pkgs.fossbeamer}/bin/fossbeamer https://example.com";
+    program = "${pkgs.fossbeamer}/bin/fossbeamer --default-config=${../default-config.json} https://example.com";
   };
 
   environment.systemPackages = [
