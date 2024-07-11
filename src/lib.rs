@@ -22,7 +22,29 @@ pub fn spawn_browser(url: String, command_receiver: Option<Receiver<Command>>) -
         .with_title("Fossbeamer")
         .build(&event_loop)
         .unwrap();
-    let webview = WebViewBuilder::new(&window).with_url(url).build()?;
+
+    #[cfg(any(
+        target_os = "windows",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "android"
+    ))]
+    let builder = WebViewBuilder::new(&window);
+
+    #[cfg(not(any(
+        target_os = "windows",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "android"
+    )))]
+    let builder = {
+        use tao::platform::unix::WindowExtUnix;
+        use wry::WebViewBuilderExtUnix;
+        let vbox = window.default_vbox().unwrap();
+        WebViewBuilder::new_gtk(vbox)
+    };
+
+    let webview = builder.with_url(url).build()?;
 
     if let Some(command_receiver) = command_receiver {
         let proxy = event_loop.create_proxy();
