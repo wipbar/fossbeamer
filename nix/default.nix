@@ -26,6 +26,14 @@ let
   ++ gtk3.buildInputs
   ++ pango.buildInputs;
 
+  pkgsAArch64 = import nixpkgs {
+    localSystem = builtins.currentSystem;
+    crossSystem = "aarch64-linux";
+    overlays = [ (import ./overlay.nix) ];
+  };
+
+  machine = (pkgsAArch64.nixos ./configuration.nix);
+
 in
 rec {
   inherit pkgs;
@@ -40,6 +48,8 @@ rec {
       export PKG_CONFIG_PATH=${pkgs.lib.makeSearchPathOutput "dev" "lib/pkgconfig" rust_sys_dep_libs}
     '';
   };
+
+  inherit machine;
 
   env = pkgs.buildEnv {
     name = "dev-env";
