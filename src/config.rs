@@ -14,22 +14,19 @@ pub(crate) struct Config {
 
 impl Config {
     pub fn load(default_config_path: Option<PathBuf>) -> Result<Self, Error> {
-        let override_config_path = PathBuf::from("config.json");
+        let config_path = {
+            let override_config_path = PathBuf::from("config.json");
 
-        let final_path = if override_config_path.is_file() {
-            override_config_path
-        } else if let Some(path) = default_config_path {
-            if !path.is_file() {
-                return Err(Error::NoConfigFileFound);
+            if override_config_path.is_file() {
+                Some(override_config_path)
+            } else {
+                None
             }
-            path
-        } else {
-            return Err(Error::NoConfigFileFound);
-        };
+        }
+        .or(default_config_path)
+        .ok_or(Error::NoConfigFileFound)?;
 
-        let Ok(file) = File::open(final_path) else {
-            return Err(Error::FileIoError);
-        };
+        let file = File::open(config_path).or(Err(Error::FileIoError))?;
 
         serde_json::from_reader(BufReader::new(file)).or(Err(Error::ParsingError))
     }
