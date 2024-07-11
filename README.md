@@ -17,6 +17,9 @@ taking care of all necessary system dependencies.
 For "release builds" we use `crate2nix` to build Rust crates incrementally and
 in isolation.
 
+You can build fossbeamer for your current system using `nix-build nix -A
+fossbeamer`, and then invoke it via `result/bin/fossbeamer`.
+
 Whenever there's a change in the crate dependencies, run
 `crate2nix generate --all-features` to re-generate `Cargo.nix`.
 

@@ -29,6 +29,7 @@ let
 in
 rec {
   inherit pkgs;
+  inherit (pkgs) fossbeamer;
 
   profileEnv = pkgs.writeTextFile {
     name = "profile-env";
