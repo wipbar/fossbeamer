@@ -27,6 +27,11 @@
     "systemd.journald.forward_to_console=1"
   ];
 
+  # Switch to systemd-initrd, which is the future (tm).
+  # Also it has proven to be a bit more permissive with some boards where the
+  # sdcard takes ages to spin up.
+  boot.initrd.systemd.enable = true;
+
   nix.settings.max-jobs = 8;
 
   # Configure networking
