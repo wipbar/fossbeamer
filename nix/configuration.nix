@@ -27,7 +27,6 @@
     "systemd.journald.forward_to_console=1"
   ];
 
-  nix.gc.automatic = true;
   nix.settings.max-jobs = 8;
 
   # Configure networking
