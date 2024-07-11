@@ -21,8 +21,9 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - run: nix-build nix -A fossbeamer
       # These are cross-builds if executed on x64, native builds on aarch64
-      - run: nix-build nix -A machine.toplevel
-      - run: nix-build nix -A machine.sdImage
+      # Disabled for now as they get rate-limited by github, and builds without any cache take too long.
+      # - run: nix-build nix -A machine.toplevel
+      # - run: nix-build nix -A machine.sdImage
 
   checks:
     runs-on: ubuntu-22.04
