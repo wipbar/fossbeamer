@@ -3,10 +3,12 @@ use std::sync::mpsc::channel;
 
 use clap::Parser;
 
-use config::Config;
+use common::Config;
 
+mod browser;
 mod common;
 mod config;
+mod error;
 mod mqtt;
 mod system;
 
@@ -47,5 +49,5 @@ fn main() -> wry::Result<()> {
     };
 
     listener.start().unwrap();
-    fossbeamer::spawn_browser(cli.url, Some(receiver))
+    browser::spawn_browser(cli.url, Some(receiver))
 }

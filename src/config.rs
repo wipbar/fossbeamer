@@ -1,16 +1,7 @@
 use std::path::PathBuf;
 use std::{fs::File, io::BufReader};
 
-use serde::Deserialize;
-
-use crate::common::Error;
-
-#[derive(Deserialize)]
-pub(crate) struct Config {
-    pub id: Option<String>,
-    pub host: String,
-    pub port: u16,
-}
+use crate::{common::Config, error::Error};
 
 impl Config {
     pub fn load(default_config_path: Option<PathBuf>) -> Result<Self, Error> {

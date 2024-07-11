@@ -3,7 +3,7 @@ use std::{
     io::{BufRead, BufReader},
 };
 
-use crate::common::Error;
+use crate::error::Error;
 
 #[cfg(debug_assertions)]
 const CPU_INFO_PATH: &'static str = "./cpuinfo";

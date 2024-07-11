@@ -1,13 +1,14 @@
 use std::{sync::mpsc::Sender, thread};
 
-use fossbeamer::Command;
 use rumqttc::{Client, ClientError, MqttOptions, Packet, Publish};
+
+use crate::common::Command;
 
 pub(crate) struct Listener {
     pub id: String,
     pub host: String,
     pub port: u16,
-    pub sender: Sender<fossbeamer::Command>,
+    pub sender: Sender<Command>,
 }
 
 impl Listener {
