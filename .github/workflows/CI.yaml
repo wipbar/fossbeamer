@@ -23,3 +23,19 @@ jobs:
       # These are cross-builds if executed on x64, native builds on aarch64
       - run: nix-build nix -A machine.toplevel
       - run: nix-build nix -A machine.sdImage
+
+  checks:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v27
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Install env
+        run:  nix-env -iA env -f nix/
+      - name: Check treefmt
+        run:  treefmt --fail-on-change
+      - name: Check crate2nix
+        run:  crate2nix generate --all-features && treefmt Cargo.nix && git diff --exit-code Cargo.nix
