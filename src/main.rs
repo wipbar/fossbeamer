@@ -1,4 +1,7 @@
-use std::{env, sync::mpsc::channel};
+use std::path::PathBuf;
+use std::sync::mpsc::channel;
+
+use clap::Parser;
 
 use config::Config;
 
@@ -7,31 +10,42 @@ mod config;
 mod mqtt;
 mod system;
 
+#[derive(Parser)]
+#[command(
+    version,
+    about,
+    long_about = "Screen software developed for the bar at BornHack"
+)]
+struct Cli {
+    url: String,
+
+    #[arg(long = "default-config")]
+    default_config_path: Option<String>,
+}
+
 fn main() -> wry::Result<()> {
-    if let Some(url) = env::args().nth(1) {
-        print!("Acquiring the CPU serial number...\r");
-        let serial = system::get_cpu_serial().unwrap();
+    let cli = Cli::parse();
 
-        println!("The CPU serial number is {}", serial);
+    print!("Acquiring the CPU serial number...\r");
+    let serial = system::get_cpu_serial().unwrap();
+    println!(" {}", serial);
 
-        println!("Loading the config...");
-        let config = Config::load().unwrap();
+    println!("The CPU serial number is {}", serial);
 
-        println!("Opening {}...", url);
+    println!("Loading the config...");
+    let config = Config::load(cli.default_config_path.map(|p| PathBuf::from(p))).unwrap();
 
-        let (sender, receiver) = channel();
+    println!("Opening {}...", cli.url);
 
-        let listener = mqtt::Listener {
-            id: config.id.unwrap_or(serial),
-            host: config.host,
-            port: config.port,
-            sender,
-        };
+    let (sender, receiver) = channel();
 
-        listener.start().unwrap();
-        fossbeamer::spawn_browser(url, Some(receiver))
-    } else {
-        println!("Fossbeamer requires a URL as a parameter.");
-        Ok(())
-    }
+    let listener = mqtt::Listener {
+        id: config.id.unwrap_or(serial),
+        host: config.host,
+        port: config.port,
+        sender,
+    };
+
+    listener.start().unwrap();
+    fossbeamer::spawn_browser(cli.url, Some(receiver))
 }

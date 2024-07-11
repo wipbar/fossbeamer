@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::{fs::File, io::BufReader};
 
 use serde::Deserialize;
@@ -12,12 +13,21 @@ pub(crate) struct Config {
 }
 
 impl Config {
-    pub fn load() -> Result<Self, Error> {
-        let Ok(file) = File::open("config.json") else {
-            return Err(Error::FileIoError);
-        };
-        let reader = BufReader::new(file);
+    pub fn load(default_config_path: Option<PathBuf>) -> Result<Self, Error> {
+        let config_path = {
+            let override_config_path = PathBuf::from("config.json");
 
-        serde_json::from_reader(reader).or(Err(Error::ParsingError))
+            if override_config_path.is_file() {
+                Some(override_config_path)
+            } else {
+                None
+            }
+        }
+        .or(default_config_path)
+        .ok_or(Error::NoConfigFileFound)?;
+
+        let file = File::open(config_path).or(Err(Error::FileIoError))?;
+
+        serde_json::from_reader(BufReader::new(file)).or(Err(Error::ParsingError))
     }
 }
