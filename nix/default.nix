@@ -50,6 +50,7 @@ rec {
 
       # Nix
       nixpkgs-fmt
+      crate2nix
 
       # Rust
       cargo
