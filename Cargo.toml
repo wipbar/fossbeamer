@@ -5,10 +5,15 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.9", features = ["derive"] }
+color-eyre = "0.6.3"
+eyre = "0.6.12"
 rumqttc = "0.24.0"
 serde = { version = "1.0.204", features = ["derive"] }
 serde_json = "1.0.120"
 tao = "0.28.1"
+thiserror = "1.0.62"
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 wry = "0.41.0"
 
 # FUTUREWORK: Somehow rustc wants to link this against zlib.
