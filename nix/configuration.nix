@@ -71,6 +71,7 @@
 
   environment.systemPackages = [
     pkgs.htop
+    pkgs.kmsxx # kmsprint
   ];
 
   users.users."root".initialPassword = "";
