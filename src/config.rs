@@ -26,8 +26,9 @@ impl Config {
         .or(default_config_path)
         .ok_or(Error::NoConfigFileFound)?;
 
-        let file = File::open(config_path).or(Err(Error::FileIoError))?;
+        let file =
+            File::open(&config_path).map_err(|e| Error::FileIoError(config_path.clone(), e))?;
 
-        serde_json::from_reader(BufReader::new(file)).or(Err(Error::ParsingError))
+        serde_json::from_reader(BufReader::new(file)).or(Err(Error::ParsingError(config_path)))
     }
 }
