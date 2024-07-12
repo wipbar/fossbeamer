@@ -31,9 +31,7 @@ fn main() -> color_eyre::eyre::Result<()> {
 
     let cli = Cli::parse();
 
-    debug!("Acquiring the CPU serial number...");
-    let serial = system::get_cpu_serial().context("getting cpu serial")?;
-    debug!(%serial, "got CPU serial number");
+    let machine_id = system::get_machine_id().context("getting machine id")?;
 
     debug!("Loading the config");
     let config = Config::load(cli.default_config_path.map(|p| PathBuf::from(p)))
@@ -44,7 +42,7 @@ fn main() -> color_eyre::eyre::Result<()> {
     let (sender, receiver) = channel();
 
     let listener = mqtt::Listener {
-        id: config.id.unwrap_or(serial),
+        id: config.id.unwrap_or(machine_id),
         host: config.host,
         port: config.port,
         sender,

@@ -1,31 +1,17 @@
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-};
+use tracing::{instrument, warn};
 
-use crate::common::Error;
+const MACHINE_ID_PATH: &'static str = "/etc/machine-id";
 
-#[cfg(debug_assertions)]
-const CPU_INFO_PATH: &'static str = "./cpuinfo";
-
-#[cfg(not(debug_assertions))]
-const CPU_INFO_PATH: &'static str = "/proc/cpuinfo";
-
-pub(crate) fn get_cpu_serial() -> Result<String, Error> {
-    let file =
-        File::open(CPU_INFO_PATH).map_err(|e| Error::FileIoError(CPU_INFO_PATH.into(), e))?;
-    let reader = BufReader::new(file);
-    let mut lines = reader.lines();
-
-    while let Some(Ok(line)) = lines.next() {
-        if line.starts_with("Serial") {
-            let (_, serial) = line
-                .split_once(':')
-                .ok_or(Error::ParsingError(CPU_INFO_PATH.into()))?;
-
-            return Ok(serial.trim().to_string());
-        }
+/// Returns the system machine id
+/// (https://www.freedesktop.org/software/systemd/man/latest/machine-id.html)
+/// Falls back to a random uuid if the file doesn't exist, or another error
+/// occurs during retrieval. It logs a warning in this case.
+#[instrument(ret, err)]
+pub(crate) fn get_machine_id() -> std::io::Result<String> {
+    if let Ok(machine_id) = std::fs::read_to_string(MACHINE_ID_PATH) {
+        Ok(machine_id.trim().to_string())
+    } else {
+        warn!("unable to read machine id, setting a random one");
+        Ok(uuid::Uuid::new_v4().to_string())
     }
-
-    Err(Error::ParsingError(CPU_INFO_PATH.into()))
 }

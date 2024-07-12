@@ -14,6 +14,7 @@ tao = "0.28.1"
 thiserror = "1.0.62"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+uuid = { version = "1.10.0", features = ["v4"] }
 wry = "0.41.0"
 
 # FUTUREWORK: Somehow rustc wants to link this against zlib.
