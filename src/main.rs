@@ -4,6 +4,8 @@ use std::sync::mpsc::channel;
 use clap::Parser;
 
 use config::Config;
+use eyre::Context;
+use tracing::{debug, info};
 
 mod common;
 mod config;
@@ -23,19 +25,21 @@ struct Cli {
     default_config_path: Option<String>,
 }
 
-fn main() -> wry::Result<()> {
+fn main() -> color_eyre::eyre::Result<()> {
+    color_eyre::install()?;
+    setup_tracing();
+
     let cli = Cli::parse();
 
-    print!("Acquiring the CPU serial number...\r");
-    let serial = system::get_cpu_serial().unwrap();
-    println!(" {}", serial);
+    debug!("Acquiring the CPU serial number...");
+    let serial = system::get_cpu_serial().context("getting cpu serial")?;
+    debug!(%serial, "got CPU serial number");
 
-    println!("The CPU serial number is {}", serial);
+    debug!("Loading the config");
+    let config = Config::load(cli.default_config_path.map(|p| PathBuf::from(p)))
+        .context("loading config")?;
 
-    println!("Loading the config...");
-    let config = Config::load(cli.default_config_path.map(|p| PathBuf::from(p))).unwrap();
-
-    println!("Opening {}...", cli.url);
+    info!(url=%cli.url, "Opening URL");
 
     let (sender, receiver) = channel();
 
@@ -46,6 +50,26 @@ fn main() -> wry::Result<()> {
         sender,
     };
 
-    listener.start().unwrap();
-    fossbeamer::spawn_browser(cli.url, Some(receiver))
+    listener.start().context("starting the mqtt listener")?;
+    fossbeamer::spawn_browser(cli.url, Some(receiver))?;
+
+    Ok(())
+}
+
+pub fn setup_tracing() {
+    use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+    let subscriber = tracing_subscriber::registry()
+        .with(
+            EnvFilter::builder()
+                .with_default_directive(tracing::Level::INFO.into())
+                .from_env()
+                .expect("Invalid RUST_LOG"),
+        )
+        .with(
+            tracing_subscriber::fmt::Layer::new()
+                .with_writer(std::io::stderr)
+                .compact(),
+        );
+
+    subscriber.try_init().expect("failed to setup tracing");
 }
