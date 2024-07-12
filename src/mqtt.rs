@@ -27,8 +27,6 @@ impl<F: Fn() -> Config + std::marker::Send + 'static> Listener<F> {
                 .subscribe(format!("screens/{}", id), rumqttc::QoS::AtLeastOnce)
                 .unwrap();
 
-            let sender = self.sender.clone();
-
             for event in connection.iter() {
                 println!("{:?}", event);
 
@@ -44,7 +42,7 @@ impl<F: Fn() -> Config + std::marker::Send + 'static> Listener<F> {
                             continue 'outer;
                         }
 
-                        sender.send(command).unwrap();
+                        self.sender.send(command).unwrap();
                     }
                 }
             }
