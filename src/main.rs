@@ -34,20 +34,17 @@ fn main() -> wry::Result<()> {
 
     println!("The CPU serial number is {}", serial);
 
-    println!("Loading the config...");
-    let config = Config::load(cli.default_config_path.map(|p| PathBuf::from(p))).unwrap();
+    let default_config_path = cli.default_config_path.map(|p| PathBuf::from(p));
 
     println!("Opening {}...", cli.url);
 
     let (sender, receiver) = channel();
 
     let listener = mqtt::Listener {
-        id: config.id.unwrap_or(serial),
-        host: config.host,
-        port: config.port,
+        get_config: move || Config::load(default_config_path.clone()).unwrap(),
         sender,
     };
 
-    listener.start().unwrap();
+    listener.start();
     browser::spawn_browser(cli.url, Some(receiver))
 }

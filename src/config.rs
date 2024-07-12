@@ -21,4 +21,14 @@ impl Config {
 
         serde_json::from_reader(BufReader::new(file)).or(Err(Error::ParsingError))
     }
+
+    pub fn save(&self) -> Result<(), Error> {
+        let file = File::options()
+            .write(true)
+            .truncate(true)
+            .open("config.json")
+            .or(Err(Error::FileIoError))?;
+
+        serde_json::to_writer(file, self).or(Err(Error::SerializationError))
+    }
 }
