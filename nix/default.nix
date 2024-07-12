@@ -32,7 +32,8 @@ let
     overlays = [ (import ./overlay.nix) ];
   };
 
-  machine = (pkgsAArch64.nixos ./configuration.nix);
+  machine-generic = (pkgsAArch64.nixos ./configuration.nix);
+  machine-cm3 = (pkgsAArch64.nixos ./configuration-cm3.nix);
 
 in
 rec {
@@ -49,7 +50,7 @@ rec {
     '';
   };
 
-  inherit machine;
+  inherit machine-generic machine-cm3;
 
   env = pkgs.buildEnv {
     name = "dev-env";

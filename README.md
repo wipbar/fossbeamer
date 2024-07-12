@@ -27,11 +27,14 @@ Whenever there's a change in the crate dependencies, run
 A NixOS machine config is provided in `nix/configuration.nix`.
 It describes running fossbeamer in a wayland compositor, cage.
 
+We have two flavours, `machine-generic` and `machine-cm3`, as the CM3 variant
+needs to have its own bootloader.
+
 The system closure can be built with:
-`nix-build nix -A machine.toplevel`
+`nix-build nix -A machine-generic.toplevel`
 
 An SD-card image can be built with:
-`nix-build nix -A machine.sdImage`
+`nix-build nix -A machine-generic.sdImage`
 
 If you invoke the build from `x86_64-linux`, it'll cross-compile the sdcard
 image. If you build on an `aarch64-linux` box, it'll natively compile. Both
