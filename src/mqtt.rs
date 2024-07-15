@@ -1,7 +1,8 @@
-use std::{sync::mpsc::Sender, thread};
+use std::{sync::mpsc::Sender, thread, time::Duration};
 
 use fossbeamer::Command;
 use rumqttc::{Client, ClientError, MqttOptions, Packet, Publish};
+use tracing::{debug, warn};
 
 pub(crate) struct Listener {
     pub id: String,
@@ -20,20 +21,34 @@ impl Listener {
 
         thread::spawn(move || {
             for event in connection.iter() {
-                println!("{:?}", event);
+                match event {
+                    Ok(event) => match event {
+                        rumqttc::Event::Incoming(Packet::Publish(Publish {
+                            topic,
+                            payload,
+                            ..
+                        })) => {
+                            if topic == "commands" {
+                                if let Ok(command) = serde_json::from_slice::<Command>(&payload) {
+                                    debug!(?command, "received command");
 
-                if let Ok(rumqttc::Event::Incoming(Packet::Publish(Publish {
-                    topic,
-                    payload,
-                    ..
-                }))) = event
-                {
-                    if topic == "commands" {
-                        if let Ok(command) = serde_json::from_slice::<Command>(&payload) {
-                            println!("{:?}", command);
-
-                            self.sender.send(command).unwrap();
+                                    self.sender.send(command).unwrap();
+                                }
+                            } else {
+                                debug!(?topic, "received other topic");
+                            }
                         }
+                        rumqttc::Event::Incoming(incoming) => {
+                            debug!(?incoming, "other incoming event");
+                        }
+                        rumqttc::Event::Outgoing(out) => {
+                            debug!(?out, "outgoing event");
+                        }
+                    },
+                    Err(e) => {
+                        warn!(err=%e, "connection error");
+                        // sleep a bit
+                        std::thread::sleep(Duration::from_secs(5));
                     }
                 }
             }
