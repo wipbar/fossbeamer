@@ -27,7 +27,7 @@ let
   ++ pango.buildInputs;
 
   pkgsAArch64 = import nixpkgs {
-    localSystem = builtins.currentSystem;
+    localSystem = system;
     crossSystem = "aarch64-linux";
     overlays = [ (import ./overlay.nix) ];
   };
