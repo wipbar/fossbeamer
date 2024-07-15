@@ -28,4 +28,22 @@ in
   # u-boot doesn't know the proper device tree name, so cannot pick from FTDIR
   # on its own.
   hardware.deviceTree.name = "broadcom/bcm2837-rpi-cm3-io3.dtb";
+  hardware.deviceTree.overlays = [
+    {
+      # http://lists.infradead.org/pipermail/linux-arm-kernel/2024-July/943386.html
+      name = "fix-hdmi-hpd-gpio-port";
+      dtsText = ''
+        /dts-v1/;
+        /plugin/;
+        / {
+          compatible = "raspberrypi,3-compute-module", "brcm,bcm2837";
+        };
+        &{/soc} {
+          hdmi {
+            hpd-gpios = <&expgpio 0 1>;
+          };
+        };
+      '';
+    }
+  ];
 }
