@@ -77,6 +77,7 @@
   environment.systemPackages = [
     pkgs.htop
     pkgs.kmsxx # kmsprint
+    pkgs.i2c-tools
   ];
 
   users.users."root".initialPassword = "";
