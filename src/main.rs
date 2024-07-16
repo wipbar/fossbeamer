@@ -34,8 +34,8 @@ fn main() -> color_eyre::eyre::Result<()> {
     let machine_id = system::get_machine_id().context("getting machine id")?;
 
     debug!("Loading the config");
-    let config = Config::load(cli.default_config_path.map(|p| PathBuf::from(p)))
-        .context("loading config")?;
+    let config =
+        Config::load(cli.default_config_path.map(PathBuf::from)).context("loading config")?;
 
     info!(url=%cli.url, "Opening URL");
 

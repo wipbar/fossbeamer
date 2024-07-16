@@ -6,6 +6,7 @@ use tao::{
     event_loop::{ControlFlow, EventLoopBuilder},
     window::WindowBuilder,
 };
+use tracing::{debug, warn};
 use wry::WebViewBuilder;
 
 #[derive(Debug, Deserialize)]
@@ -58,9 +59,10 @@ pub fn spawn_browser(url: String, command_receiver: Option<Receiver<Command>>) -
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
+        debug!(?event, "got event");
 
         match event {
-            Event::NewEvents(StartCause::Init) => println!("Opened a browser window!"),
+            Event::NewEvents(StartCause::Init) => debug!("init"),
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..
@@ -68,13 +70,19 @@ pub fn spawn_browser(url: String, command_receiver: Option<Receiver<Command>>) -
             | Event::UserEvent(Command::Stop) => *control_flow = ControlFlow::Exit,
             Event::UserEvent(Command::Reload) => {
                 if let Ok(url) = webview.url() {
-                    // TODO: Remove the use of unwrap
-                    webview.load_url(url.as_str()).unwrap();
+                    if let Err(e) = webview.load_url(url.as_str()) {
+                        warn!(err=%e, "unable to load webview")
+                    };
                 }
             }
-            // TODO: Remove the use of unwrap
-            Event::UserEvent(Command::LoadUrl { url }) => webview.load_url(url.as_str()).unwrap(),
-            _ => (),
+            Event::UserEvent(Command::LoadUrl { url }) => {
+                if let Err(e) = webview.load_url(url.as_str()) {
+                    warn!(err=%e, "unable to load webview")
+                };
+            }
+            _ => {
+                warn!(?event, "got other event")
+            }
         }
     })
 }
