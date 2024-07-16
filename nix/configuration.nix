@@ -71,6 +71,7 @@
     enable = true;
     user = "kiosk";
     program = "${pkgs.fossbeamer}/bin/fossbeamer --default-config=${../default-config.json} https://example.com";
+    environment.GIO_MODULE_DIR = "${pkgs.glib-networking}/lib/gio/modules/";
     extraArguments = [
       "-d" # don't draw client decorations when possible
     ];
