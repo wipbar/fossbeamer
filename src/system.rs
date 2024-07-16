@@ -1,6 +1,6 @@
 use tracing::{instrument, warn};
 
-const MACHINE_ID_PATH: &'static str = "/etc/machine-id";
+const MACHINE_ID_PATH: &str = "/etc/machine-id";
 
 /// Returns the system machine id
 /// (https://www.freedesktop.org/software/systemd/man/latest/machine-id.html)
