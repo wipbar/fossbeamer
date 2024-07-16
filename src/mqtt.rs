@@ -1,8 +1,8 @@
-use std::{sync::mpsc::Sender, thread, time::Duration};
-
+use bstr::BStr;
 use fossbeamer::Command;
 use rumqttc::{Client, ClientError, MqttOptions, Packet, Publish};
-use tracing::{debug, warn};
+use std::{sync::mpsc::Sender, thread, time::Duration};
+use tracing::{debug, info, warn, Span};
 
 pub(crate) struct Listener {
     pub id: String,
@@ -28,14 +28,16 @@ impl Listener {
                             payload,
                             ..
                         })) => {
-                            if topic == "commands" {
-                                if let Ok(command) = serde_json::from_slice::<Command>(&payload) {
-                                    debug!(?command, "received command");
+                            Span::current().record("topic", &topic);
+                            match serde_json::from_slice::<Command>(&payload) {
+                                Ok(command) => {
+                                    info!(?command, "received command");
 
                                     self.sender.send(command).unwrap();
                                 }
-                            } else {
-                                debug!(?topic, "received other topic");
+                                Err(e) => {
+                                    warn!(err=%e, payload=%BStr::new(&payload), "received payload that couldn't be parsed");
+                                }
                             }
                         }
                         rumqttc::Event::Incoming(incoming) => {
