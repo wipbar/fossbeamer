@@ -3,12 +3,12 @@
         "branch": "nixos-unstable",
         "description": "Nix Packages collection",
         "homepage": null,
-        "owner": "NixOS",
+        "owner": "flokli",
         "repo": "nixpkgs",
-        "rev": "9e3825de8dbe84ae96c09000bc73ea1b82e7529b",
-        "sha256": "0jqhxwmqa5mriwmp41wjsi3c6srp9njk9qrv531d7f1dyzz0hnwh",
+        "rev": "d7c6aaa12742fc4b7b7151885c24b96a90159baf",
+        "sha256": "1847wrkm765fj92jjs8b4vabqj34rnxzkxp3hi9l5iyl4ycs7qar",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/9e3825de8dbe84ae96c09000bc73ea1b82e7529b.tar.gz",
+        "url": "https://github.com/flokli/nixpkgs/archive/d7c6aaa12742fc4b7b7151885c24b96a90159baf.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }
