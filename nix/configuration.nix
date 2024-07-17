@@ -98,6 +98,8 @@
     pkgs.i2c-tools
   ];
 
+  documentation.enable = false; # Reduces closure size and build time.
+
   users.users."root".initialPassword = "";
   system.stateVersion = "24.05";
 }
