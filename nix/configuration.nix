@@ -70,7 +70,10 @@
   services.cage = {
     enable = true;
     user = "kiosk";
-    program = "${pkgs.fossbeamer}/bin/fossbeamer --default-config=${../default-config.json} https://example.com";
+    program = pkgs.writers.writeBash "run-cage-program" ''
+      ${pkgs.wlr-randr}/bin/wlr-randr --output HDMI-A-1 --transform 180
+      ${pkgs.fossbeamer}/bin/fossbeamer --default-config=${../default-config.json} https://wip.bar
+    '';
     environment = {
       GST_PLUGIN_SYSTEM_PATH_1_0 = lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" (with pkgs.gst_all_1;[
         gstreamer
