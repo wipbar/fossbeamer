@@ -71,7 +71,7 @@
     enable = true;
     user = "kiosk";
     program = pkgs.writers.writeBash "run-cage-program" ''
-      ${pkgs.wlr-randr}/bin/wlr-randr --output HDMI-A-1 --transform 180
+      ${pkgs.wlr-randr}/bin/wlr-randr --output HDMI-A-1 --transform 180 --scale 2
       ${pkgs.fossbeamer}/bin/fossbeamer --default-config=${../default-config.json} https://wip.bar
     '';
     environment = {
