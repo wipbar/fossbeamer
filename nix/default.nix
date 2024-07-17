@@ -47,6 +47,14 @@ rec {
     text = ''
       export NIX_PATH=nixpkgs=${toString pkgs.path}
       export PKG_CONFIG_PATH=${pkgs.lib.makeSearchPathOutput "dev" "lib/pkgconfig" rust_sys_dep_libs}
+      export GST_PLUGIN_SYSTEM_PATH_1_0=${pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" (with pkgs.gst_all_1;[
+        gstreamer
+        gst-plugins-base
+        gst-plugins-good
+        gst-plugins-bad
+        gst-libav
+      ])}
+      export GIO_MODULE_DIR="${pkgs.glib-networking}/lib/gio/modules/"
     '';
   };
 

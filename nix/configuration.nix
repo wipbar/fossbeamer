@@ -80,7 +80,6 @@
         gst-plugins-base
         gst-plugins-good
         gst-plugins-bad
-        # gst-plugins-ugly
         gst-libav
       ]);
       GIO_MODULE_DIR = "${pkgs.glib-networking}/lib/gio/modules/";
