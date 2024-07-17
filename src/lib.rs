@@ -81,7 +81,7 @@ pub fn spawn_browser(url: String, command_receiver: Option<Receiver<Command>>) -
                 };
             }
             _ => {
-                warn!(?event, "got other event")
+                debug!(?event, "got other event")
             }
         }
     })
