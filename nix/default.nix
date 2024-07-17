@@ -79,6 +79,9 @@ rec {
       rustc
       pkg-config
       stdenv.cc
+
+      # Deployment
+      morph
     ]);
   };
 }
