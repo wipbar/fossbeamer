@@ -39,17 +39,17 @@ fn main() -> color_eyre::eyre::Result<()> {
 
     info!(url=%cli.url, "Opening URL");
 
-    let (sender, receiver) = channel();
+    let (tx, rx) = channel();
 
     let listener = mqtt::Listener {
         id: config.id.unwrap_or(machine_id),
         host: config.host,
         port: config.port,
-        sender,
+        sender: tx,
     };
 
     listener.start().context("starting the mqtt listener")?;
-    fossbeamer::spawn_browser(cli.url, Some(receiver))?;
+    fossbeamer::spawn_browser(cli.url, rx)?;
 
     Ok(())
 }

@@ -17,7 +17,9 @@ pub enum Command {
     Stop,
 }
 
-pub fn spawn(url: String, command_receiver: Option<Receiver<Command>>) -> wry::Result<()> {
+/// Opens a browser window at the given URL.
+/// A channel is passed in to control the browser window from the outside.
+pub fn spawn(url: String, commands: Receiver<Command>) -> wry::Result<()> {
     let event_loop = EventLoopBuilder::<Command>::with_user_event().build();
     let window = WindowBuilder::new()
         .with_title("Fossbeamer")
@@ -47,15 +49,13 @@ pub fn spawn(url: String, command_receiver: Option<Receiver<Command>>) -> wry::R
 
     let webview = builder.with_url(url).build()?;
 
-    if let Some(command_receiver) = command_receiver {
-        let proxy = event_loop.create_proxy();
-        thread::spawn(move || {
-            while let Ok(command) = command_receiver.recv() {
-                // TODO: Remove the use of unwrap
-                proxy.send_event(command).unwrap();
-            }
-        });
-    }
+    let proxy = event_loop.create_proxy();
+    thread::spawn(move || {
+        while let Ok(command) = commands.recv() {
+            // TODO: Remove the use of unwrap
+            proxy.send_event(command).unwrap();
+        }
+    });
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
