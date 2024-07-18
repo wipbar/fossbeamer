@@ -42,3 +42,35 @@ pub struct Info {
     pub name: String,
     pub serial: String,
 }
+
+impl From<edid_rs::EDID> for Info {
+    fn from(value: edid_rs::EDID) -> Self {
+        let mut display_info = Info {
+            make: format!(
+                "{}{}{}",
+                value.product.manufacturer_id.0,
+                value.product.manufacturer_id.1,
+                value.product.manufacturer_id.2
+            ),
+            modes: vec![],
+            model: format!("{}", value.product.product_code),
+            name: "Unknown".to_string(),
+            serial: "Unknown".to_string(),
+        };
+
+        for descriptor in value.descriptors.0 {
+            match descriptor {
+                edid_rs::MonitorDescriptor::SerialNumber(sn) => display_info.serial = sn,
+                edid_rs::MonitorDescriptor::OtherString(s) => {
+                    debug!(%s, "MonitorDescriptor::OtherString")
+                }
+                edid_rs::MonitorDescriptor::RangeLimits { .. } => {}
+                edid_rs::MonitorDescriptor::MonitorName(name) => display_info.name = name,
+                edid_rs::MonitorDescriptor::Undefined(_, _) => {}
+                edid_rs::MonitorDescriptor::ManufacturerDefined(_, _) => {}
+            }
+        }
+
+        display_info
+    }
+}
