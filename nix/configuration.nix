@@ -90,6 +90,7 @@
       "-d" # don't draw client decorations when possible
     ];
   };
+  systemd.services."cage-tty1".restartIfChanged = lib.mkForce true;
 
   environment.systemPackages = [
     pkgs.htop
