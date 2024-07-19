@@ -3,9 +3,14 @@
 }:
 
 let
+  overlays = [
+    (_: pkgs: {
+      fossbeamer = pkgs.callPackage ./fossbeamer.nix { };
+    })
+  ];
+
   pkgs = import nixpkgs {
-    inherit system;
-    overlays = [ (import ./overlay.nix) ];
+    inherit system overlays;
   };
 
   # All libraries we need to link against during an imperative `cargo build`.
@@ -29,16 +34,15 @@ let
   pkgsAArch64 = import nixpkgs {
     localSystem = system;
     crossSystem = "aarch64-linux";
-    overlays = [ (import ./overlay.nix) ];
+    inherit overlays;
   };
 
   machine-generic = (pkgsAArch64.nixos ./configuration.nix);
   machine-cm3 = (pkgsAArch64.nixos ./configuration-cm3.nix);
   vm = (pkgs.nixos ./configuration.nix).vm;
-
 in
 rec {
-  inherit pkgs;
+  inherit pkgs pkgsAArch64;
   inherit (pkgs) fossbeamer;
 
   profileEnv = pkgs.writeTextFile {
