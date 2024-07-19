@@ -1,88 +1,76 @@
-use std::{sync::mpsc::Receiver, thread};
+use serde::{Deserialize, Serialize};
 
-use serde::Deserialize;
-use tao::{
-    event::{Event, StartCause, WindowEvent},
-    event_loop::{ControlFlow, EventLoopBuilder},
-    window::WindowBuilder,
-};
-use tracing::{debug, warn};
-use wry::WebViewBuilder;
+mod browser;
+pub use browser::spawn as spawn_browser;
+pub use browser::Command;
+use tracing::debug;
 
-#[derive(Debug, Deserialize)]
-#[serde(tag = "kind")]
-pub enum Command {
-    LoadUrl { url: String },
-    Reload,
-    Stop,
+/// Represents the current configuration for this display.
+#[derive(Debug, Deserialize, Serialize)]
+pub struct State {
+    pub enabled: bool,
+    pub mode: Mode,
+    pub power: bool,
+    pub scale: f64,
+    pub transform: String,
+    pub scenario: Scenario,
 }
 
-pub fn spawn_browser(url: String, command_receiver: Option<Receiver<Command>>) -> wry::Result<()> {
-    let event_loop = EventLoopBuilder::<Command>::with_user_event().build();
-    let window = WindowBuilder::new()
-        .with_title("Fossbeamer")
-        .build(&event_loop)
-        .unwrap();
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Mode {
+    pub width: u64,
+    pub height: u64,
+    pub refresh: f64,
+    pub picture_aspect_ratio: String,
+}
 
-    #[cfg(any(
-        target_os = "windows",
-        target_os = "macos",
-        target_os = "ios",
-        target_os = "android"
-    ))]
-    let builder = WebViewBuilder::new(&window);
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(tag = "name", content = "args", rename_all = "lowercase")]
+pub enum Scenario {
+    URL { url: String },
+    Blank,
+    Video { url: String },
+}
 
-    #[cfg(not(any(
-        target_os = "windows",
-        target_os = "macos",
-        target_os = "ios",
-        target_os = "android"
-    )))]
-    let builder = {
-        use tao::platform::unix::WindowExtUnix;
-        use wry::WebViewBuilderExtUnix;
-        let vbox = window.default_vbox().unwrap();
-        WebViewBuilder::new_gtk(vbox)
-    };
+// Contains more general information about the display
+// (make, model, serial, supported modes)
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Info {
+    pub make: String,
+    pub model: String,
+    pub modes: Vec<Mode>,
+    pub name: String,
+    pub serial: String,
+}
 
-    let webview = builder.with_url(url).build()?;
+impl From<edid_rs::EDID> for Info {
+    fn from(value: edid_rs::EDID) -> Self {
+        let mut display_info = Info {
+            make: format!(
+                "{}{}{}",
+                value.product.manufacturer_id.0,
+                value.product.manufacturer_id.1,
+                value.product.manufacturer_id.2
+            ),
+            modes: vec![],
+            model: format!("{}", value.product.product_code),
+            name: "Unknown".to_string(),
+            serial: "Unknown".to_string(),
+        };
 
-    if let Some(command_receiver) = command_receiver {
-        let proxy = event_loop.create_proxy();
-        thread::spawn(move || {
-            while let Ok(command) = command_receiver.recv() {
-                // TODO: Remove the use of unwrap
-                proxy.send_event(command).unwrap();
-            }
-        });
-    }
-
-    event_loop.run(move |event, _, control_flow| {
-        *control_flow = ControlFlow::Wait;
-        debug!(?event, "got event");
-
-        match event {
-            Event::NewEvents(StartCause::Init) => debug!("init"),
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            }
-            | Event::UserEvent(Command::Stop) => *control_flow = ControlFlow::Exit,
-            Event::UserEvent(Command::Reload) => {
-                if let Ok(url) = webview.url() {
-                    if let Err(e) = webview.load_url(url.as_str()) {
-                        warn!(err=%e, "unable to load webview")
-                    };
+        for descriptor in value.descriptors.0 {
+            match descriptor {
+                edid_rs::MonitorDescriptor::SerialNumber(sn) => display_info.serial = sn,
+                edid_rs::MonitorDescriptor::OtherString(s) => {
+                    debug!(%s, "MonitorDescriptor::OtherString")
                 }
-            }
-            Event::UserEvent(Command::LoadUrl { url }) => {
-                if let Err(e) = webview.load_url(url.as_str()) {
-                    warn!(err=%e, "unable to load webview")
-                };
-            }
-            _ => {
-                debug!(?event, "got other event")
+                edid_rs::MonitorDescriptor::RangeLimits { .. } => {}
+                edid_rs::MonitorDescriptor::MonitorName(name) => display_info.name = name,
+                edid_rs::MonitorDescriptor::Undefined(_, _) => {}
+                edid_rs::MonitorDescriptor::ManufacturerDefined(_, _) => {}
             }
         }
-    })
+
+        display_info
+    }
 }

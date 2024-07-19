@@ -1526,6 +1526,17 @@ rec {
         ];
 
       };
+      "edid-rs" = rec {
+        crateName = "edid-rs";
+        version = "0.1.0";
+        edition = "2018";
+        sha256 = "0b2jw5difvsywvzlrq1g67xgwq1klqcmhj6zak1mmn2w90rzmd9a";
+        authors = [
+          "tuomas56 <pigworts2@gmail.com>"
+        ];
+        features = { };
+        resolvedDefaultFeatures = [ "default" ];
+      };
       "equivalent" = rec {
         crateName = "equivalent";
         version = "1.0.1";
@@ -1740,6 +1751,10 @@ rec {
           {
             name = "color-eyre";
             packageId = "color-eyre";
+          }
+          {
+            name = "edid-rs";
+            packageId = "edid-rs";
           }
           {
             name = "eyre";
