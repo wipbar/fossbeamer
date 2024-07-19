@@ -47,4 +47,14 @@ in
   "screen7" = { config, pkgs, ... }: common // {
     deployment.targetHost = "root@n7.screens.wip.bar";
   };
+
+  "bornfurs1" = { config, pkgs, ... }: common // {
+    deployment.targetHost = "root@bornfurs1.screens.wip.bar";
+  };
+  "bornfurs2" = { config, pkgs, ... }: common // {
+    deployment.targetHost = "root@bornfurs2.screens.wip.bar";
+  };
+  "bornfurs3" = { config, pkgs, ... }: common // {
+    deployment.targetHost = "root@bornfurs3.screens.wip.bar";
+  };
 }
