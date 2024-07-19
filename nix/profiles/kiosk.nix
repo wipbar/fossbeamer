@@ -32,6 +32,14 @@
   };
   systemd.services."cage-tty1".restartIfChanged = lib.mkForce true;
 
+  fonts.enableDefaultPackages = true;
+  fonts.packages = with pkgs; [
+    noto-fonts-color-emoji
+    roboto
+    source-code-pro
+    gentium
+  ];
+
   environment.systemPackages = [
     pkgs.htop
   ];
