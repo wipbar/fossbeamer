@@ -9,7 +9,7 @@ use tracing::{debug, warn};
 use wry::WebViewBuilder;
 
 /// Commands to control the browser instance.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(tag = "kind")]
 pub enum Command {
     LoadUrl { url: String },

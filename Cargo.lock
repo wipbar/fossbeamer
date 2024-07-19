@@ -621,6 +621,7 @@ dependencies = [
  "color-eyre",
  "edid-rs",
  "eyre",
+ "parking_lot",
  "rumqttc",
  "serde",
  "serde_json",
