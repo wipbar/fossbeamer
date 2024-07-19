@@ -34,6 +34,7 @@ let
 
   machine-generic = (pkgsAArch64.nixos ./configuration.nix);
   machine-cm3 = (pkgsAArch64.nixos ./configuration-cm3.nix);
+  vm = (pkgs.nixos ./configuration.nix).vm;
 
 in
 rec {
@@ -58,7 +59,7 @@ rec {
     '';
   };
 
-  inherit machine-generic machine-cm3;
+  inherit machine-generic machine-cm3 vm;
 
   env = pkgs.buildEnv {
     name = "dev-env";

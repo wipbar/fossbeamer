@@ -40,6 +40,16 @@ If you invoke the build from `x86_64-linux`, it'll cross-compile the sdcard
 image. If you build on an `aarch64-linux` box, it'll natively compile. Both
 works.
 
+### VM Test
+For a smaller feedback loop, it's possible to build a script running the
+software stack in a local qemu (KVM). It might have another virtual screen
+resolution, and obviously doesn't test the hardware bits.
+
+To run it, invoke:
+```
+$(nix-build nix -A vm)/bin/run-fossbeamer-vm
+```
+
 --
 [wip.bar]: https://wip.bar
 [Nix]: https://nixos.org
