@@ -28,6 +28,17 @@ self: pkgs: rec {
       pkgs.defaultCrateOverrides // {
         fossbeamer = prev: {
           src = filterRustCrateSrc { root = prev.src.origSrc; };
+
+          nativeBuildInputs = [ pkgs.wrapGAppsHook ];
+          buildInputs = with pkgs; [
+            glib-networking
+          ] ++ (with gst_all_1; [
+            gstreamer
+            gst-plugins-base
+            gst-plugins-good
+            gst-plugins-bad
+            gst-libav
+          ]);
         };
       };
   };
