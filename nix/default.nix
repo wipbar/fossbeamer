@@ -78,6 +78,7 @@ rec {
       rust-analyzer
       rustc
       pkg-config
+      stdenv.cc
     ]);
   };
 }
