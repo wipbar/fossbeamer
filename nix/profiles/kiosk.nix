@@ -3,7 +3,6 @@
   users.users.kiosk = {
     isNormalUser = true;
     uid = 1000;
-    packages = [ pkgs.dconf ];
   };
 
   # And configure cage to show fossbeamer on it.
