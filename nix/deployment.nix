@@ -1,15 +1,5 @@
 let
-  nixpkgs = (import ./sources.nix { inherit system; }).nixpkgs;
-  system = builtins.currentSystem;
-  pkgs = import nixpkgs {
-    inherit system;
-    overlays = [ (import ./overlay.nix) ];
-  };
-  pkgsAArch64 = import nixpkgs {
-    localSystem = system;
-    crossSystem = "aarch64-linux";
-    overlays = [ (import ./overlay.nix) ];
-  };
+  inherit (import ./. { }) pkgs pkgsAArch64;
 
   common = {
     # https://github.com/DBCDK/morph/issues/106
