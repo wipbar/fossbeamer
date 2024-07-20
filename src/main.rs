@@ -25,6 +25,9 @@ struct Cli {
 
     #[arg(long = "default-config")]
     default_config_path: Option<String>,
+
+    #[arg(long)]
+    mqtt_topic_prefix: Option<String>,
 }
 
 fn main() -> color_eyre::eyre::Result<()> {
@@ -121,14 +124,20 @@ fn main() -> color_eyre::eyre::Result<()> {
 
     let (tx, rx) = channel();
 
-    let listener = mqtt::Listener {
-        id: config.id.unwrap_or(display_info.serial),
-        host: config.host,
-        port: config.port,
-        sender: tx,
-    };
+    let listener = mqtt::Listener::new(
+        config.id.unwrap_or_else(|| display_info.serial.clone()),
+        config.host,
+        config.port,
+        cli.mqtt_topic_prefix
+            .unwrap_or_else(|| "screens".to_string()),
+    )?;
 
-    listener.start().context("starting the mqtt listener")?;
+    // register our display
+    // FUTURWORK: multiple display support
+    listener
+        .add_display(&display_info, tx)
+        .context("adding display")?;
+
     fossbeamer::spawn_browser(cli.url, rx)?;
 
     Ok(())

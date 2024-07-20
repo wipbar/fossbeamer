@@ -1761,6 +1761,10 @@ rec {
             packageId = "eyre";
           }
           {
+            name = "parking_lot";
+            packageId = "parking_lot";
+          }
+          {
             name = "rumqttc";
             packageId = "rumqttc";
           }
