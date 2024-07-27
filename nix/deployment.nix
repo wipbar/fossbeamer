@@ -50,4 +50,14 @@ in
   "bornfurs4" = { config, pkgs, ... }: common // {
     deployment.targetHost = "root@151.216.32.186";
   };
+  "flokli" = { config, pkgs, ... }: {
+    # https://github.com/DBCDK/morph/issues/106
+    nixpkgs.pkgs = pkgsAArch64;
+    nixpkgs.localSystem.system = "aarch64-linux";
+
+    imports = [ ./configuration.nix ];
+    deployment.substituteOnDestination = true;
+    deployment.targetUser = "root";
+    deployment.targetHost = "fossbeamer.flokli.io";
+  };
 }
