@@ -47,4 +47,7 @@ in
   "bornfurs3" = { config, pkgs, ... }: common // {
     deployment.targetHost = "root@bornfurs3.screens.wip.bar";
   };
+  "bornfurs4" = { config, pkgs, ... }: common // {
+    deployment.targetHost = "root@151.216.32.186";
+  };
 }
