@@ -16,6 +16,7 @@
   boot.kernelParams = lib.mkForce [
     "systemd.log_target=console"
     "systemd.journald.forward_to_console=1"
+    "cma=256MB"
   ];
 
   # configure journald to not logs to disk
