@@ -14,6 +14,8 @@
       ${pkgs.fossbeamer}/bin/fossbeamer --default-config=${../../default-config.json} https://wip.bar
     '';
     environment = {
+      GDK_GL = "gles";
+      GDK_DEBUG = "vulkan,opengl,dmabuf";
       LIBGL_DEBUG = "verbose";
       RUST_LOG = "debug";
     };
