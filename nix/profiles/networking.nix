@@ -1,4 +1,5 @@
-{ ... }: {
+{ ... }:
+{
   # Configure networking
   networking.hostName = "fossbeamer";
   networking.useDHCP = true;
@@ -9,4 +10,3 @@
   services.resolved.dnssec = "false";
   networking.nftables.enable = true;
 }
- 

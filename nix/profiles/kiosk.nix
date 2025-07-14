@@ -1,4 +1,5 @@
-{ lib, pkgs, ... }: {
+{ lib, pkgs, ... }:
+{
   # Create a kiosk user
   users.users.kiosk = {
     isNormalUser = true;

@@ -1,10 +1,11 @@
 # Machine config
-{ config
-, modulesPath
-, pkgs
-, lib
-, ...
-}: {
+{
+  modulesPath,
+  pkgs,
+  lib,
+  ...
+}:
+{
   imports = [
     (modulesPath + "/installer/sd-card/sd-image-aarch64.nix")
     ./profiles/kiosk.nix
@@ -26,10 +27,7 @@
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
   # zfs keeps breaking, removing all unneeded filesystems from the image.
-  boot.supportedFilesystems =
-    lib.mkForce
-      [ "vfat" ];
-
+  boot.supportedFilesystems = lib.mkForce [ "vfat" ];
 
   # Switch to systemd-initrd, which is the future (tm).
   # Also it has proven to be a bit more permissive with some boards where the

@@ -1,4 +1,5 @@
-{ ... }: {
+{ ... }:
+{
 
   # Configure ssh
   services.openssh = {
