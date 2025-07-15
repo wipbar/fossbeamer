@@ -4,6 +4,7 @@ mod browser;
 pub use browser::spawn as spawn_browser;
 pub use browser::Command;
 use tracing::debug;
+use tracing::instrument;
 
 /// Represents the current configuration for this display.
 #[derive(Debug, Deserialize, Serialize)]
@@ -16,12 +17,38 @@ pub struct State {
     pub scenario: Scenario,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq, Serialize)]
 pub struct Mode {
     pub width: u64,
     pub height: u64,
-    pub refresh: f64,
-    pub picture_aspect_ratio: String,
+}
+
+impl Mode {
+    #[instrument()]
+    pub fn parse_x_y(s: &str) -> Option<Self> {
+        let (x, y) = s.split_once('x')?;
+
+        Some(Mode {
+            width: x.parse::<u64>().ok()?,
+            height: y.parse::<u64>().ok()?,
+        })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Mode;
+
+    #[test]
+    fn test_mode() {
+        assert_eq!(
+            Mode {
+                width: 1920,
+                height: 1080
+            },
+            Mode::parse_x_y("1920x1080").expect("must parse")
+        );
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -43,34 +70,34 @@ pub struct Info {
     pub serial: String,
 }
 
-impl From<edid_rs::EDID> for Info {
-    fn from(value: edid_rs::EDID) -> Self {
-        let mut display_info = Info {
+impl Info {
+    pub fn from_edid_and_modes(edid: edid_rs::EDID, modes: Vec<Mode>) -> Self {
+        let mut value = Info {
             make: format!(
                 "{}{}{}",
-                value.product.manufacturer_id.0,
-                value.product.manufacturer_id.1,
-                value.product.manufacturer_id.2
+                edid.product.manufacturer_id.0,
+                edid.product.manufacturer_id.1,
+                edid.product.manufacturer_id.2
             ),
-            modes: vec![],
-            model: format!("{}", value.product.product_code),
+            modes,
+            model: format!("{}", edid.product.product_code),
             name: "Unknown".to_string(),
             serial: "Unknown".to_string(),
         };
 
-        for descriptor in value.descriptors.0 {
+        for descriptor in edid.descriptors.0 {
             match descriptor {
-                edid_rs::MonitorDescriptor::SerialNumber(sn) => display_info.serial = sn,
+                edid_rs::MonitorDescriptor::SerialNumber(sn) => value.serial = sn,
                 edid_rs::MonitorDescriptor::OtherString(s) => {
                     debug!(%s, "MonitorDescriptor::OtherString")
                 }
                 edid_rs::MonitorDescriptor::RangeLimits { .. } => {}
-                edid_rs::MonitorDescriptor::MonitorName(name) => display_info.name = name,
+                edid_rs::MonitorDescriptor::MonitorName(name) => value.name = name,
                 edid_rs::MonitorDescriptor::Undefined(_, _) => {}
                 edid_rs::MonitorDescriptor::ManufacturerDefined(_, _) => {}
             }
         }
 
-        display_info
+        value
     }
 }

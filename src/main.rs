@@ -1,10 +1,10 @@
-use std::io::BufRead;
 use std::sync::mpsc::channel;
 use std::{io::Cursor, path::PathBuf};
 
 use clap::Parser;
 
 use config::Config;
+use eyre::eyre;
 use eyre::Context;
 use fossbeamer::{Info, Mode};
 use tracing::{debug, info, warn};
@@ -30,83 +30,56 @@ struct Cli {
     mqtt_topic_prefix: Option<String>,
 }
 
+// Try to read information about the display via DRM.
+fn display_info_drm(base_path: &std::path::Path) -> eyre::Result<Info> {
+    let edid_data = std::fs::read(base_path.join("edid")).wrap_err("reading edid data")?;
+
+    // parse edid
+    let edid = edid_rs::parse(&mut Cursor::new(edid_data))
+        .map_err(|err| eyre!("failed to parse edid: {err}"))?;
+
+    // parse modes.
+    let modes_data =
+        std::fs::read_to_string(base_path.join("modes")).wrap_err("failed to read modes")?;
+
+    let modes: Vec<_> = modes_data
+        .lines()
+        .filter_map(|line| match Mode::parse_x_y(line) {
+            Some(mode) => Some(mode),
+            None => {
+                warn!(%line, "failed to parse mode line");
+                None
+            }
+        })
+        .collect();
+
+    Ok(Info::from_edid_and_modes(edid, modes))
+}
+
 fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
     setup_tracing();
 
     let cli = Cli::parse();
 
-    let mut display_info: Option<Info> = None;
     // Try peeking at the EDID data of the connected display.
     // This is currently hardcoded to a single display at card0-HDMI-A-1,
     // as that's what's running on the CM3's.
-    if let Ok(edid_data) = std::fs::read("/sys/class/drm/card0/card0-HDMI-A-1/edid") {
-        match edid_rs::parse(&mut Cursor::new(edid_data)) {
-            Ok(edid) => {
-                // construct a new display_info by converting the EDID.
-                let mut di: Info = edid.into();
-
-                // parse modes from the `modes` file in the same dir.
-                di.modes = match std::fs::read("/sys/class/drm/card0/card0-HDMI-A-1/modes") {
-                    Ok(modes_data) => {
-                        modes_data
-                            .lines()
-                            .flat_map(|x| {
-                                let x = x.unwrap();
-
-                                let xys = x.split('x').collect::<Vec<_>>();
-
-                                if xys.len() != 2 {
-                                    warn!("invalid mode line");
-                                    return None;
-                                }
-                                let (x, y) = (xys[0].parse::<u64>(), xys[1].parse::<u64>());
-
-                                Some(match (x, y) {
-                                    (Ok(width), Ok(height)) => Mode {
-                                        width,
-                                        height,
-                                        refresh: 0.0,
-                                        picture_aspect_ratio: (width as f64 / height as f64)
-                                            .to_string(), // TODO: why do we have this?
-                                    },
-                                    _ => {
-                                        warn!("invalid mode line");
-                                        return None;
-                                    }
-                                })
-                            })
-                            .collect()
-                    }
-                    Err(e) => {
-                        warn!(err=%e, "failed to read modes");
-                        // this should really not fail, but if it does, set the modes to an empty list.
-                        vec![]
-                    }
-                };
-
-                display_info = Some(di)
+    let display_info =
+        match display_info_drm(std::path::Path::new("/sys/class/drm/card0/card0-HDMI-A-1")) {
+            Ok(display_info) => display_info,
+            Err(err) => {
+                warn!(%err, "unable to read edid from DRM, fallback using machine ID as serial");
+                let machine_id = system::get_machine_id().wrap_err("getting machine id")?;
+                Info {
+                    make: "Unknown".into(),
+                    modes: vec![],
+                    model: "Unknown".into(),
+                    name: "Unknown".into(),
+                    serial: machine_id,
+                }
             }
-            Err(e) => {
-                warn!(err=%e, "failed to parse edid");
-            }
-        }
-    }
-
-    // If we couldn't read the EDID, use the machine ID as serial.
-    let display_info = match display_info {
-        Some(display_info) => display_info,
-        None => {
-            let machine_id = system::get_machine_id().context("getting machine id")?;
-            Info {
-                make: "Unknown".into(),
-                modes: vec![],
-                model: "Unknown".into(),
-                name: "Unknown".into(),
-                serial: machine_id,
-            }
-        }
-    };
+        };
 
     info!(
         machine.make=%display_info.make,
