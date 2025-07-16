@@ -72,7 +72,8 @@ fn main() -> color_eyre::eyre::Result<()> {
     // Initialize the event loop
 
     // Initialize browser window
-    let browser_window = BrowserWindow::new();
+    let browser_window = BrowserWindow::new(display_info.clone());
+
     info!(url=%cli.url, "Opening URL");
     browser_window
         .run_scenario(display::Scenario::URL { url: cli.url })
@@ -88,7 +89,7 @@ fn main() -> color_eyre::eyre::Result<()> {
 
     // Register the display
     listener
-        .add_display(browser_window, &display_info)
+        .add_display(browser_window)
         .context("adding display")?;
 
     loop {

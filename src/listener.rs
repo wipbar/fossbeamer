@@ -31,11 +31,11 @@ impl MQTT {
         port: u16,
         topic_prefix: impl Into<String> + Clone,
     ) -> eyre::Result<Self> {
+        let topic_prefix: String = topic_prefix.into();
         let (client, mut connection) = Client::new(MqttOptions::new(id, host, port), 64);
 
         let displays = Arc::new(RwLock::new(HashMap::<String, DisplayHandle>::new()));
 
-        let topic_prefix: String = topic_prefix.into();
         let catchall_topic = topic_prefix.clone();
 
         thread::spawn({
@@ -118,17 +118,29 @@ impl MQTT {
 
     /// Register a new display, using the passed display_info.
     /// `set` requests received are sent to the passed channel.
-    pub fn add_display<D>(&self, display: D, display_info: &display::Info) -> eyre::Result<()>
+    pub fn add_display<D>(&self, display: D) -> eyre::Result<()>
     where
         D: display::Display + Send + 'static,
     {
-        let k = &display_info.serial;
-        let topic = format!("{}/{}", self.topic_prefix, k);
+        let info = display.get_info();
 
-        info!(topic, "subscribing to topic");
+        // Construct topic to accept commands on.
+        let topic = format!("{}/{}/set", self.topic_prefix, &info.serial);
+
+        info!(topic, "subscribing to /set topic");
         self.client
             .subscribe(&topic, rumqttc::QoS::AtLeastOnce)
-            .context("subscribing to topic")?;
+            .wrap_err("subscribing to topic")?;
+
+        // Publish display info
+        self.client
+            .publish(
+                format!("{}/{}/info", self.topic_prefix, &info.serial),
+                rumqttc::QoS::AtLeastOnce,
+                true,
+                serde_json::to_string(&info).unwrap(),
+            )
+            .wrap_err("publishing /info")?;
 
         self.displays.write().insert(topic, Box::new(display));
 

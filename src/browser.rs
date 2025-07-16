@@ -9,20 +9,21 @@ use tao::{
 use tracing::{debug, warn};
 use wry::WebViewBuilder;
 
-use crate::display::Scenario;
+use crate::display::{self, Scenario};
 
 pub struct BrowserWindow {
     tx: mpsc::SyncSender<Command>,
+    display_info: display::Info,
 }
 
 impl BrowserWindow {
-    pub fn new() -> Self {
+    pub fn new(display_info: display::Info) -> Self {
         let (tx, rx) = mpsc::sync_channel(0);
 
         // spawn a thread receiving scenarios and process them.
         thread::spawn(move || Self::run(rx).unwrap());
 
-        Self { tx }
+        Self { tx, display_info }
     }
 
     /// Opens a browser window, and processes [Command] events sent to it.
@@ -112,6 +113,10 @@ impl crate::display::Display for BrowserWindow {
                 .wrap_err("sending command"),
             Scenario::Video { url: _ } => Err(eyre::eyre!("video unimplemented so far")),
         }
+    }
+
+    fn get_info(&self) -> &display::Info {
+        &self.display_info
     }
 }
 

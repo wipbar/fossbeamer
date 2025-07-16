@@ -22,7 +22,7 @@ pub struct State {
     pub scenario: Scenario,
 }
 
-#[derive(Debug, Deserialize, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq, Serialize)]
 pub struct Mode {
     pub width: u64,
     pub height: u64,
@@ -30,7 +30,7 @@ pub struct Mode {
 
 // Contains more general information about the display
 // (make, model, serial, supported modes)
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Info {
     pub make: String,
     pub model: String,
@@ -42,4 +42,7 @@ pub struct Info {
 pub trait Display: Send + Sync {
     /// Runs the given scenario on the Display.
     fn run_scenario(&self, scenario: Scenario) -> eyre::Result<()>;
+
+    /// Returns information about the display
+    fn get_info(&self) -> &Info;
 }
