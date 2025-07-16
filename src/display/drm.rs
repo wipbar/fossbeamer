@@ -6,6 +6,7 @@ use tracing::{debug, instrument, warn};
 
 use crate::display::Info;
 use crate::display::Mode;
+use crate::get_ips;
 
 // Try to read information about the display via DRM.
 pub fn display_info_drm(base_path: &std::path::Path) -> eyre::Result<Info> {
@@ -46,6 +47,9 @@ fn gen_info(edid: edid_rs::EDID, modes: Vec<Mode>) -> Info {
         model: format!("{}", edid.product.product_code),
         name: "Unknown".to_string(),
         serial: "Unknown".to_string(),
+        extra: Some(serde_json::json!({
+            "ip_addrs": get_ips(),
+        })),
     };
 
     for descriptor in edid.descriptors.0 {

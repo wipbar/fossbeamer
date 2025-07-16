@@ -37,6 +37,8 @@ pub struct Info {
     pub modes: Vec<Mode>,
     pub name: String,
     pub serial: String,
+    #[serde(flatten, skip_serializing_if = "Option::is_none")]
+    pub extra: Option<serde_json::Value>,
 }
 
 pub trait Display: Send + Sync {

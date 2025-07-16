@@ -7,6 +7,7 @@ use tracing::{debug, info, warn};
 use fossbeamer::{
     browser::BrowserWindow,
     display::{self, Display},
+    get_ips,
 };
 
 mod common;
@@ -53,6 +54,9 @@ fn main() -> color_eyre::eyre::Result<()> {
                 model: "Unknown".into(),
                 name: "Unknown".into(),
                 serial: machine_id,
+                extra: Some(serde_json::json!({
+                    "ip_addrs": get_ips(),
+                })),
             }
         }
     };
