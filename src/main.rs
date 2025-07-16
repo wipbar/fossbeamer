@@ -1,12 +1,13 @@
-use std::path::PathBuf;
-use std::sync::mpsc::channel;
-
 use clap::Parser;
-
 use config::Config;
 use eyre::Context;
-use fossbeamer::display;
+use std::{path::PathBuf, time::Duration};
 use tracing::{debug, info, warn};
+
+use fossbeamer::{
+    browser::BrowserWindow,
+    display::{self, Display},
+};
 
 mod common;
 mod config;
@@ -38,6 +39,7 @@ fn main() -> color_eyre::eyre::Result<()> {
     // Try peeking at the EDID data of the connected display.
     // This is currently hardcoded to a single display at card0-HDMI-A-1,
     // as that's what's running on the CM3's.
+    // FUTUREWORK: enumerate monitors somehow, and handle multiple
     let display_info = match display::display_info_drm(std::path::Path::new(
         "/sys/class/drm/card0/card0-HDMI-A-1",
     )) {
@@ -67,10 +69,16 @@ fn main() -> color_eyre::eyre::Result<()> {
     let config =
         Config::load(cli.default_config_path.map(PathBuf::from)).context("loading config")?;
 
+    // Initialize the event loop
+
+    // Initialize browser window
+    let browser_window = BrowserWindow::new();
     info!(url=%cli.url, "Opening URL");
+    browser_window
+        .run_scenario(display::Scenario::URL { url: cli.url })
+        .wrap_err("running scenario")?;
 
-    let (tx, rx) = channel();
-
+    // Initialize MQTT listener
     let listener = listener::MQTT::new(
         config.id.unwrap_or_else(|| display_info.serial.clone()),
         config.host,
@@ -78,17 +86,14 @@ fn main() -> color_eyre::eyre::Result<()> {
         cli.mqtt_topic_prefix,
     )?;
 
-    tx.send(fossbeamer::Command::LoadUrl { url: cli.url })?;
-
-    // register our display
-    // FUTURWORK: multiple display support
+    // Register the display
     listener
-        .add_display(&display_info, tx)
+        .add_display(browser_window, &display_info)
         .context("adding display")?;
 
-    fossbeamer::spawn_browser(rx)?;
-
-    Ok(())
+    loop {
+        std::thread::sleep(Duration::from_secs(1));
+    }
 }
 
 pub fn setup_tracing() {

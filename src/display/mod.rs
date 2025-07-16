@@ -4,7 +4,7 @@ mod drm;
 
 pub use drm::display_info_drm;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(tag = "name", content = "args", rename_all = "lowercase")]
 pub enum Scenario {
     URL { url: String },
@@ -37,4 +37,9 @@ pub struct Info {
     pub modes: Vec<Mode>,
     pub name: String,
     pub serial: String,
+}
+
+pub trait Display: Send + Sync {
+    /// Runs the given scenario on the Display.
+    fn run_scenario(&self, scenario: Scenario) -> eyre::Result<()>;
 }
