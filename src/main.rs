@@ -26,8 +26,8 @@ struct Cli {
     #[arg(long = "default-config")]
     default_config_path: Option<String>,
 
-    #[arg(long)]
-    mqtt_topic_prefix: Option<String>,
+    #[arg(long, default_value = "screens")]
+    mqtt_topic_prefix: String,
 }
 
 // Try to read information about the display via DRM.
@@ -101,8 +101,7 @@ fn main() -> color_eyre::eyre::Result<()> {
         config.id.unwrap_or_else(|| display_info.serial.clone()),
         config.host,
         config.port,
-        cli.mqtt_topic_prefix
-            .unwrap_or_else(|| "screens".to_string()),
+        cli.mqtt_topic_prefix,
     )?;
 
     tx.send(fossbeamer::Command::LoadUrl { url: cli.url })?;
