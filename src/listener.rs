@@ -1,6 +1,6 @@
 use bstr::BStr;
 use eyre::Context;
-use fossbeamer::{Command, Info};
+use fossbeamer::{display, Command};
 use parking_lot::RwLock;
 use rumqttc::{Client, MqttOptions, Packet, Publish};
 use std::{
@@ -122,7 +122,7 @@ impl MQTT {
     /// `set` requests received are sent to the passed channel.
     pub fn add_display(
         &self,
-        display_info: &Info,
+        display_info: &display::Info,
         tx: Sender<fossbeamer::Command>,
     ) -> eyre::Result<()> {
         let k = &display_info.serial;
