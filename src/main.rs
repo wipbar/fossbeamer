@@ -105,13 +105,15 @@ fn main() -> color_eyre::eyre::Result<()> {
             .unwrap_or_else(|| "screens".to_string()),
     )?;
 
+    tx.send(fossbeamer::Command::LoadUrl { url: cli.url })?;
+
     // register our display
     // FUTURWORK: multiple display support
     listener
         .add_display(&display_info, tx)
         .context("adding display")?;
 
-    fossbeamer::spawn_browser(cli.url, rx)?;
+    fossbeamer::spawn_browser(rx)?;
 
     Ok(())
 }

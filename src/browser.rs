@@ -17,9 +17,9 @@ pub enum Command {
     Stop,
 }
 
-/// Opens a browser window at the given URL.
+/// Opens a browser window.
 /// A channel is passed in to control the browser window from the outside.
-pub fn spawn(url: String, commands: Receiver<Command>) -> wry::Result<()> {
+pub fn spawn(commands: Receiver<Command>) -> wry::Result<()> {
     let event_loop = EventLoopBuilder::<Command>::with_user_event().build();
     let window = WindowBuilder::new()
         .with_title("Fossbeamer")
@@ -47,7 +47,7 @@ pub fn spawn(url: String, commands: Receiver<Command>) -> wry::Result<()> {
         WebViewBuilder::new_gtk(vbox)
     };
 
-    let webview = builder.with_url(url).build()?;
+    let webview = builder.with_url("about:blank").build()?;
 
     let proxy = event_loop.create_proxy();
     thread::spawn(move || {
