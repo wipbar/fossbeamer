@@ -11,7 +11,7 @@ use tracing::{debug, info, warn};
 
 mod common;
 mod config;
-mod mqtt;
+mod listener;
 mod system;
 
 #[derive(Parser)]
@@ -97,7 +97,7 @@ fn main() -> color_eyre::eyre::Result<()> {
 
     let (tx, rx) = channel();
 
-    let listener = mqtt::Listener::new(
+    let listener = listener::MQTT::new(
         config.id.unwrap_or_else(|| display_info.serial.clone()),
         config.host,
         config.port,

@@ -12,7 +12,7 @@ use std::{
 use tracing::{debug, info, warn, Span};
 
 /// Maintains a connection to an MQTT broker.
-pub(crate) struct Listener {
+pub(crate) struct MQTT {
     /// The MQTT client
     client: rumqttc::Client,
 
@@ -23,7 +23,7 @@ pub(crate) struct Listener {
     senders: Arc<RwLock<HashMap<String, Sender<fossbeamer::Command>>>>,
 }
 
-impl Listener {
+impl MQTT {
     /// Prepares a connection to the broker, and spawns off a thread dealing
     /// with received messages.
     /// It spawns off a thread relaying messages to the Senders added in a
