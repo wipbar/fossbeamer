@@ -24,6 +24,30 @@ You can build fossbeamer for your current system using
 Whenever there's a change in the crate dependencies, run
 `crate2nix generate --all-features; treefmt` to re-generate `Cargo.nix`.
 
+
+## Functionality
+Fossbeamer is a fullscreen Rust application, using webkitgtk to render a website.
+It can be remote-controlled via MQTT.
+
+It picks the broker specified in the config, and a topic using a (hopefully
+unique) serial number. In the case of the CM3 displays, this is the serial
+present in the EDID data (so surviving re-flashes).
+
+In other cases, it might be the machine-id.
+
+On bootup, publishes a message to `screens/$id/info`, containing data about
+the connected display, as well as the IP addresses present on the network
+interface(s).
+
+It also listens to `screens/$id/set`, to allow being configured to show another
+URL.
+Check `src/display/mod.rs`, `enum Scenario` for the exact definition, but the
+following message payload configures it to show the bornhack website:
+
+```
+{"name":"url", "args": { "url": "https://bornhack.dk"}}
+```
+
 ### Machine configuration
 Various NixOS machine configs are provided in `nix/configuration.nix`.
 It describes running fossbeamer in a wayland compositor, cage.
