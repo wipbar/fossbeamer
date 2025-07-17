@@ -43,6 +43,55 @@ If you invoke the build from `x86_64-linux`, it'll cross-compile.
 If you build on an `aarch64-linux` box, it'll natively compile. Both should
 work.
 
+### Deployment
+Initially, you can flash the resulting SD card image using `dd` or similar
+tools. Depending on the flash chip and image size, it can take 10-15mins.
+
+Subsequent redeploys can be done via
+[morph](https://github.com/DBCDK/morph), if you have ssh access.
+They only copy the paths that are changed (so it's much faster), but might be
+not possible if the disk is too small. If that's the case, you can run
+`nix-collect-garbage -d` and try again, or resort to flashing the SD image.
+
+#### Initial flashing to CM3
+The displays with the integrated CM3 modules can be flashed without opening the
+case, performing the following steps:
+
+ - Unplug the AC cable from the monitor
+ - Unplug ALL USB peripherals from the USB hub
+ - Connect the USB-B side of a USB-A to USB-B cable to the monitor
+ - Connect the USB-A side to your computer
+ - Plug the AC cable into the monitor
+ - Run `sudo rpiboot` on your computer, wait for the block device to appear.
+   You can run `nix-shell -p rpiboot` to get a functioning version.
+   Once it's mounted, take note of the name, e.g. `/dev/sda` by looking at the
+   `dmesg -w` output.
+ - Ensure the block devices are unmounted if they got automounted.
+   Use `sudo umount /dev/sda*` or similar.
+ - Flash the image.
+   Assuming you used above `nix-build` command,
+   it sits in a `result/sd-image-nixos-image-*.img.zst` path (zstd-compressed).
+   You can use the following command (please double-check the output block device):
+   `zstd -d < result/sd-image-nixos-image-*.img.zst | sudo dd of=/dev/sda bs=4M status=progress`
+   `dd` calls `sync()`, so it might sit around seemingly doing nothing at the
+   end. Wait for the command to fully return!
+ - Disconnect the USB cable
+ - Disconnect the AC cable from the monitor. Wait at least 5 seconds for
+   everything to power down.
+ - Reconnect the USB peripherals and AC power.
+ - The monitor should show U-Boot, a kernel log and eventually boot into
+   fossbeamer.
+
+#### Incremental updates via morph
+There is a `nix/deployment.nix` file keeping track of all deployments.
+
+You can use the `morph deploy --on=$pattern nix/deployment.nix switch` command to
+deploy the latest version to that host. Check the `morph` documentation for
+other options.
+
+As explained above, this might work for small updates only, and major updates
+might need a reflash.
+
 ### VM Test
 For a smaller feedback loop, it's possible to build a script running the
 software stack in a local qemu (KVM). It might have another virtual screen
