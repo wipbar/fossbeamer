@@ -40,8 +40,8 @@ let
     inherit overlays;
   };
 
-  machine-generic = (pkgsAArch64.nixos ./configuration.nix);
-  machine-cm3 = (pkgsAArch64.nixos ./configuration-cm3.nix);
+  machine-bar = (pkgsAArch64.nixos ./configuration-bar.nix);
+  machine-bornfurs = (pkgsAArch64.nixos ./configuration-bornfurs.nix);
   vm = (pkgs.nixos ./configuration.nix).vm;
 in
 rec {
@@ -71,7 +71,11 @@ rec {
     '';
   };
 
-  inherit machine-generic machine-cm3 vm;
+  inherit
+    machine-bar
+    machine-bornfurs
+    vm
+    ;
 
   env = pkgs.buildEnv {
     name = "dev-env";

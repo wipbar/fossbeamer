@@ -3,7 +3,8 @@
 WIP
 
 This provides an application, as well as the tooling around a single full-screen
-application running on displays at [wip.bar](https://wip.bar/).
+application running on displays at [wip.bar](https://wip.bar/), a Bar opened
+during [Bornhack](https://bornhack.dk).
 
 ## Development setup
 [Nix] is used to pin dependencies, and [Direnv] to enter a development
@@ -17,28 +18,30 @@ taking care of all necessary system dependencies.
 For "release builds" we use `crate2nix` to build Rust crates incrementally and
 in isolation.
 
-You can build fossbeamer for your current system using `nix-build nix -A
-fossbeamer`, and then invoke it via `result/bin/fossbeamer`.
+You can build fossbeamer for your current system using
+`nix-build nix -A fossbeamer`, and then invoke it via `result/bin/fossbeamer`.
 
 Whenever there's a change in the crate dependencies, run
-`crate2nix generate --all-features` to re-generate `Cargo.nix`.
+`crate2nix generate --all-features; treefmt` to re-generate `Cargo.nix`.
 
 ### Machine configuration
-A NixOS machine config is provided in `nix/configuration.nix`.
+Various NixOS machine configs are provided in `nix/configuration.nix`.
 It describes running fossbeamer in a wayland compositor, cage.
 
-We have two flavours, `machine-generic` and `machine-cm3`, as the CM3 variant
-needs to have its own bootloader.
+We have multiple flavours, depending on where they're used:
 
-The system closure can be built with:
-`nix-build nix -A machine-generic.toplevel`
+ - `machine-bar`
+ - `machine-bornfurs`
 
-An SD-card image can be built with:
-`nix-build nix -A machine-generic.sdImage`
+The system toplevel can be reached via:
+`nix-build nix -A machine-$flavour.toplevel`
 
-If you invoke the build from `x86_64-linux`, it'll cross-compile the sdcard
-image. If you build on an `aarch64-linux` box, it'll natively compile. Both
-works.
+An SD-card image can be reached via:
+`nix-build nix -A machine-$flavour.sdImage`
+
+If you invoke the build from `x86_64-linux`, it'll cross-compile.
+If you build on an `aarch64-linux` box, it'll natively compile. Both should
+work.
 
 ### VM Test
 For a smaller feedback loop, it's possible to build a script running the

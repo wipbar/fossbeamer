@@ -1,5 +1,6 @@
 # Machine config, specifically for raspberry cm3
 {
+  modulesPath,
   pkgs,
   ...
 }:
@@ -13,7 +14,9 @@ let
 
 in
 {
-  imports = [ ./configuration.nix ];
+  imports = [
+    (modulesPath + "/installer/sd-card/sd-image-aarch64.nix")
+  ];
 
   sdImage.populateFirmwareCommands = ''
     rm firmware/u-boot-rpi3.bin

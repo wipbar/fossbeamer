@@ -1,17 +1,18 @@
 # Machine config
 {
-  modulesPath,
   pkgs,
   lib,
   ...
 }:
 {
   imports = [
-    (modulesPath + "/installer/sd-card/sd-image-aarch64.nix")
-    ./profiles/kiosk.nix
+    ./modules/fossbeamer.nix
     ./profiles/networking.nix
     ./profiles/ssh-server.nix
   ];
+
+  fossbeamer.enable = true;
+
   # HACK: sd-image-aarch64.nix sets console=ttyS0,115200n8 (and some others),
   # which breaks the device-tree provided serial config.
   boot.kernelParams = lib.mkForce [
