@@ -48,7 +48,10 @@ in
         "-d" # don't draw client decorations when possible
       ];
     };
-    systemd.services."cage-tty1".restartIfChanged = lib.mkForce true;
+    systemd.services."cage-tty1" = {
+      restartIfChanged = lib.mkForce true;
+      serviceConfig.Restart = "always";
+    };
 
     fonts.enableDefaultPackages = true;
     fonts.packages = with pkgs; [
