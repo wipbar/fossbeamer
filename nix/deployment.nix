@@ -87,7 +87,7 @@ in
     { config, pkgs, ... }:
     cfgBornfurs
     // {
-      deployment.targetHost = "root@151.216.32.186";
+      deployment.targetHost = "root@bornfurs4.screens.wip.bar";
     };
   "flokli" =
     { config, pkgs, ... }:
