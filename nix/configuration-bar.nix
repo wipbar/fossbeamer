@@ -8,6 +8,7 @@
   imports = [
     ./configuration.nix
     ./profiles/cm3.nix
+    ./profiles/grafana-alloy.nix
   ];
 
   fossbeamer.preStart = ''
