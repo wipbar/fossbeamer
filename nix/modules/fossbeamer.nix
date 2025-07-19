@@ -52,6 +52,7 @@ in
       restartIfChanged = lib.mkForce true;
       reloadIfChanged = lib.mkForce false;
       serviceConfig.Restart = "always";
+      serviceConfig.RestartForceExitStatus = "0";
     };
 
     fonts.enableDefaultPackages = true;
