@@ -18,6 +18,16 @@ in
     (modulesPath + "/installer/sd-card/sd-image-aarch64.nix")
   ];
 
+  systemd.services.hostname-from-edid = {
+    description = "Set hostname from EDID data";
+    serviceConfig.ExecStart = "${pkgs.fossbeamer}/bin/hostname-from-edid /sys/class/drm/card0-HDMI-A-1";
+    unitConfig.Before = [
+      "cage-tty1.service"
+      "alloy.service"
+    ];
+    wantedBy = [ "multi-user.target" ];
+  };
+
   sdImage.populateFirmwareCommands = ''
     rm firmware/u-boot-rpi3.bin
     # Overwrite firmware/u-boot-rpi3.bin with the generic one

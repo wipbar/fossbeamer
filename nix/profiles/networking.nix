@@ -1,7 +1,7 @@
 { ... }:
 {
   # Configure networking
-  networking.hostName = "fossbeamer";
+  networking.hostName = "";
   networking.useDHCP = true;
   networking.useNetworkd = true;
   networking.wireless.iwd.enable = true;

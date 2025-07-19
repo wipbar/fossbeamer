@@ -2240,6 +2240,11 @@ rec {
             path = "src/main.rs";
             requiredFeatures = [ ];
           }
+          {
+            name = "hostname-from-edid";
+            path = "src/bin/hostname-from-edid.rs";
+            requiredFeatures = [ ];
+          }
         ];
         src = lib.cleanSourceWith {
           filter = sourceFilter;
