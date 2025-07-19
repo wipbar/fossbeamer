@@ -33,7 +33,7 @@ struct Cli {
 
 fn main() -> color_eyre::eyre::Result<()> {
     color_eyre::install()?;
-    setup_tracing();
+    fossbeamer::setup_tracing();
 
     let cli = Cli::parse();
 
@@ -99,22 +99,4 @@ fn main() -> color_eyre::eyre::Result<()> {
     loop {
         std::thread::sleep(Duration::from_secs(1));
     }
-}
-
-pub fn setup_tracing() {
-    use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
-    let subscriber = tracing_subscriber::registry()
-        .with(
-            EnvFilter::builder()
-                .with_default_directive(tracing::Level::INFO.into())
-                .from_env()
-                .expect("Invalid RUST_LOG"),
-        )
-        .with(
-            tracing_subscriber::fmt::Layer::new()
-                .with_writer(std::io::stderr)
-                .compact(),
-        );
-
-    subscriber.try_init().expect("failed to setup tracing");
 }

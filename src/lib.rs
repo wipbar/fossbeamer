@@ -14,3 +14,21 @@ pub fn get_ips() -> Vec<IpAddr> {
         .map(|i| i.ip())
         .collect()
 }
+
+pub fn setup_tracing() {
+    use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+    let subscriber = tracing_subscriber::registry()
+        .with(
+            EnvFilter::builder()
+                .with_default_directive(tracing::Level::INFO.into())
+                .from_env()
+                .expect("Invalid RUST_LOG"),
+        )
+        .with(
+            tracing_subscriber::fmt::Layer::new()
+                .with_writer(std::io::stderr)
+                .compact(),
+        );
+
+    subscriber.try_init().expect("failed to setup tracing");
+}
