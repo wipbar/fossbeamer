@@ -50,6 +50,7 @@ in
     };
     systemd.services."cage-tty1" = {
       restartIfChanged = lib.mkForce true;
+      reloadIfChanged = lib.mkForce false;
       serviceConfig.Restart = "always";
     };
 
